@@ -1,6 +1,7 @@
-# gpa-alok-server-
 from flask import Flask, request
-import face_recognition
+import cv2
+import cvlib as cv
+import numpy as np
 
 app = Flask(__name__)
 
@@ -11,9 +12,10 @@ def home():
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['image']
-    image = face_recognition.load_image_file(file)
-    face_locations = face_recognition.face_locations(image)
-    return {"faces_detected": len(face_locations)}
+    npimg = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    faces, confidences = cv.detect_face(img)
+    return {"faces_detected": len(faces)}
 
 if __name__ == '__main__':
     app.run()
